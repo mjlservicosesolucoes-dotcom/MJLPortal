@@ -151,7 +151,7 @@ label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bot
   <div id="corpo"></div>
   <div id="rodape">
     MJL Serviços e Soluções · CNPJ 46.636.732/0001-73 · (21) 96838-1313<br>
-    <span style="font-size:10px;">Portal v1</span>
+    <span style="font-size:10px;">Portal v1.1</span>
   </div>
 </div>
 
@@ -177,11 +177,16 @@ label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bot
 // v2, depois de ver como a Marina usa no dia a dia.
 // ================================================================
 
+// Endereco do Apps Script do PORTAL, ja embutido: o sindico e a
+// administradora abrem o link e caem direto no login, sem configurar
+// nada. Se um dia o endereco mudar, o link "configurar endereco do
+// sistema" continua ali embaixo e vence este valor.
+var URL_PADRAO='https://script.google.com/macros/s/AKfycbwo3Kdh3BeRLDavZItQOdvxXd5uvGxBpoBDBKiR7iPrsmrgJh00my0l__WpZaOlzJwdjQ/exec';
 var URL_CHAVE='mjl_portal_url', SESSAO_CHAVE='mjl_portal_sessao';
 var sessao=null, dados=null, abaAtual='hoje', timer=null;
 
 function $(id){ return document.getElementById(id); }
-function urlScript(){ return localStorage.getItem(URL_CHAVE)||''; }
+function urlScript(){ return localStorage.getItem(URL_CHAVE)||URL_PADRAO||''; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function dataBR(d){ return d?String(d).split('-').reverse().join('/'):''; }
@@ -536,7 +541,7 @@ function telaChamados(){
     var s=JSON.parse(localStorage.getItem(SESSAO_CHAVE)||'null');
     if(s&&s.token){ sessao=s; abrirApp(); return; }
   }catch(e){}
-  if(!urlScript()) avisoLogin('Antes do primeiro acesso, toque em <strong>configurar endereço do sistema</strong> e cole o endereço que a MJL enviou.','info');
+  // com a URL embutida, nao ha mais nada a configurar antes do 1o acesso
   $('in-senha').addEventListener('keydown',function(e){ if(e.key==='Enter') entrar(); });
 })();
 </script>
