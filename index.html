@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a4f7a">
+<title>MJL — Portal do Síndico</title>
+<style>
+:root{
+  --brand:#1a4f7a; --green:#1e7e4a; --red:#c0392b; --purple:#7b2d8b; --yellow:#b8860b;
+  --bg:#eef2f6; --card:#fff; --border:#dde5ec;
+  --text:#152430; --text2:#4a6478; --text3:#8a9aaa;
+  --r:12px; --shadow:0 2px 10px rgba(20,50,80,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;}
+.hidden{display:none !important;}
+.btn{border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:filter .15s;}
+.btn:active{filter:brightness(.92);}
+.btn-primary{background:var(--brand);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-ghost{background:#fff;color:var(--text2);border:1.5px solid var(--border);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--shadow);}
+.card-title{font-size:14px;font-weight:800;margin-bottom:9px;}
+input,select{font-family:inherit;font-size:15px;padding:11px 12px;border:1.5px solid var(--border);
+  border-radius:10px;width:100%;background:#fff;color:var(--text);}
+input:focus,select:focus{outline:none;border-color:var(--brand);}
+label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;}
+
+/* ---------- LOGIN ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px 16px;
+  background:linear-gradient(160deg,#1a4f7a 0%,#123a5a 100%);}
+#login .box{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:390px;box-shadow:0 10px 40px rgba(0,0,0,.25);}
+.logo{text-align:center;margin-bottom:18px;}
+.logo .nome{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.3px;}
+.logo .sub{font-size:11px;color:var(--text3);letter-spacing:1.6px;text-transform:uppercase;margin-top:2px;}
+.logo .portal{display:inline-block;margin-top:9px;background:#eef4f9;color:var(--brand);
+  font-size:11.5px;font-weight:800;letter-spacing:.8px;padding:4px 12px;border-radius:20px;}
+.aviso{font-size:12.5px;border-radius:9px;padding:10px 12px;margin-bottom:12px;line-height:1.45;}
+.aviso-err{background:#fdf1f0;border:1.5px solid #f0c8c3;color:var(--red);}
+.aviso-ok{background:#f0f8f3;border:1.5px solid #bfe0cd;color:var(--green);}
+.aviso-info{background:#eef4f9;border:1.5px solid #cfe0ee;color:var(--brand);}
+
+/* ---------- APP ---------- */
+#topo{background:var(--brand);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.14);}
+#topo .l1{display:flex;align-items:center;gap:10px;}
+#topo .nome{font-size:16px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#topo .sair{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;}
+#topo select{margin-top:9px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:700;}
+#topo select option{color:var(--text);}
+#atualizado{font-size:11px;opacity:.8;margin-top:7px;display:flex;align-items:center;gap:6px;}
+.pisca{width:7px;height:7px;border-radius:50%;background:#7ee2a8;display:inline-block;}
+
+#abas{display:flex;gap:6px;overflow-x:auto;padding:11px 16px 0;background:var(--brand);
+  position:sticky;top:0;z-index:49;-webkit-overflow-scrolling:touch;}
+#abas::-webkit-scrollbar{display:none;}
+.aba{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:9px 9px 0 0;
+  padding:10px 14px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;font-family:inherit;opacity:.75;}
+.aba.on{background:var(--bg);color:var(--brand);opacity:1;}
+
+#corpo{padding:16px 16px 40px;}
+.sec{margin-bottom:18px;}
+.sec h2{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--brand);margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--brand);}
+.linha{border-bottom:1px solid #eef2f6;padding:11px 0;}
+.linha:last-child{border-bottom:none;}
+.tarefa{font-size:14.5px;font-weight:700;}
+.meta{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.obs{font-size:13px;background:#f8fafc;border:1px solid #e6ecf2;border-radius:8px;padding:7px 10px;margin-top:6px;}
+.selo{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 8px;border-radius:4px;color:#fff;vertical-align:middle;}
+.s-ok{background:var(--green);} .s-esp{background:#9aacba;} .s-ref{background:#e67e22;}
+.s-nao{background:var(--red);} .s-info{background:var(--brand);}
+.fotos{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.fotos img{width:78px;height:78px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:#f1f5f8;}
+.par{display:flex;gap:9px;margin:9px 0;}
+.par > div{flex:1;min-width:0;}
+.par img{width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:#f1f5f8;}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#fff;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:4px;}
+.t-antes{background:var(--red);} .t-depois{background:var(--green);}
+.vazio{color:var(--text3);font-size:13.5px;}
+.kpis{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px;}
+.kpi{flex:1;min-width:92px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px;text-align:center;box-shadow:var(--shadow);}
+.kpi .n{font-size:22px;font-weight:800;color:var(--brand);line-height:1.1;}
+.kpi .l{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}
+#lightbox img{max-width:100%;max-height:88vh;border-radius:10px;}
+#rodape{text-align:center;font-size:11px;color:var(--text3);padding:18px 16px 26px;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login">
+  <div class="box">
+    <div class="logo">
+      <div class="nome">MJL Serviços e Soluções</div>
+      <div class="sub">Qualidade e excelência em serviços</div>
+      <div class="portal">PORTAL DO SÍNDICO</div>
+    </div>
+
+    <div id="login-aviso"></div>
+
+    <div id="login-form">
+      <div style="margin-bottom:12px;">
+        <label>E-mail</label>
+        <input type="email" id="in-email" autocomplete="username" inputmode="email" placeholder="seu@email.com">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label>Senha de 4 dígitos</label>
+        <input type="password" id="in-senha" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••">
+        <div style="font-size:11.5px;color:var(--text3);margin-top:5px;">
+          Primeiro acesso? Digite o e-mail cadastrado e <strong>escolha</strong> uma senha de 4 dígitos — ela fica sendo a sua.
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="entrar()">Entrar</button>
+      <div style="text-align:center;margin-top:14px;">
+        <span onclick="abrirConfig()" style="font-size:11.5px;color:var(--text3);text-decoration:underline;cursor:pointer;">configurar endereço do sistema</span>
+      </div>
+    </div>
+
+    <div id="login-config" class="hidden">
+      <div class="aviso aviso-info">Cole aqui o endereço do <strong>Apps Script do Portal</strong> que a MJL enviou. Ele termina em <strong>/exec</strong>.</div>
+      <input type="url" id="in-url" placeholder="https://script.google.com/macros/s/.../exec">
+      <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:11px;" onclick="salvarURL()">Salvar</button>
+      <button class="btn btn-ghost" style="width:100%;padding:11px;margin-top:8px;" onclick="fecharConfig()">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <div id="topo">
+    <div class="l1">
+      <div class="nome" id="t-nome">—</div>
+      <button class="sair" onclick="sair()">Sair</button>
+    </div>
+    <select id="t-cliente" onchange="trocarCliente()" class="hidden"></select>
+    <div id="atualizado"><span class="pisca"></span><span id="t-atual">—</span></div>
+  </div>
+
+  <div id="abas">
+    <button class="aba on" data-aba="hoje" onclick="irAba('hoje')">Hoje</button>
+    <button class="aba" data-aba="historico" onclick="irAba('historico')">Últimos 30 dias</button>
+    <button class="aba" data-aba="visitas" onclick="irAba('visitas')">Supervisão</button>
+    <button class="aba" data-aba="avulsos" onclick="irAba('avulsos')">Serviços extras</button>
+    <button class="aba" data-aba="chamados" onclick="irAba('chamados')">Chamados</button>
+  </div>
+
+  <div id="corpo"></div>
+  <div id="rodape">
+    MJL Serviços e Soluções · CNPJ 46.636.732/0001-73 · (21) 96838-1313<br>
+    <span style="font-size:10px;">Portal v1</span>
+  </div>
+</div>
+
+<div id="lightbox" class="hidden" onclick="this.classList.add('hidden')"><img id="lb-img" src="" alt=""></div>
+
+<script>
+// ================================================================
+// MJL — PORTAL DO SÍNDICO v1  (passo 7, versão de leitura)
+//
+// App SEPARADO dos outros três, de propósito:
+//   - o App Campo baixa a lista de colaboradores COM CPF para o login
+//     funcionar offline. Um cliente dentro dele ficaria com o CPF de
+//     toda a equipe no celular.
+//   - cliente mandando direto no colaborador caracteriza subordinação.
+//     Tudo que vem do cliente passa pela MJL antes de virar ordem.
+//
+// Este app NÃO fala com o Apps Script do Gestão. Ele fala com o Apps
+// Script do PORTAL, que filtra na planilha e só devolve o condomínio
+// desta pessoa, sem nome de colaborador. O que não vem de lá, este
+// arquivo não tem como mostrar — nem se alguém mexer no código da tela.
+//
+// v1 é SÓ LEITURA. "Pedir atenção" e assinatura da visita ficam para a
+// v2, depois de ver como a Marina usa no dia a dia.
+// ================================================================
+
+var URL_CHAVE='mjl_portal_url', SESSAO_CHAVE='mjl_portal_sessao';
+var sessao=null, dados=null, abaAtual='hoje', timer=null;
+
+function $(id){ return document.getElementById(id); }
+function urlScript(){ return localStorage.getItem(URL_CHAVE)||''; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function dataBR(d){ return d?String(d).split('-').reverse().join('/'):''; }
+function thumb(id,sz){ return 'https://drive.google.com/thumbnail?id='+id+'&sz=w'+(sz||400); }
+function verFoto(id){ $('lb-img').src=thumb(id,1600); $('lightbox').classList.remove('hidden'); }
+
+function avisoLogin(txt,tipo){
+  $('login-aviso').innerHTML = txt ? '<div class="aviso aviso-'+(tipo||'err')+'">'+txt+'</div>' : '';
+}
+
+// ---------- configuração do endereço ----------
+function abrirConfig(){
+  $('in-url').value=urlScript();
+  $('login-form').classList.add('hidden'); $('login-config').classList.remove('hidden'); avisoLogin('');
+}
+function fecharConfig(){ $('login-config').classList.add('hidden'); $('login-form').classList.remove('hidden'); }
+function salvarURL(){
+  var u=$('in-url').value.trim();
+  if(!u){ avisoLogin('Cole o endereço que a MJL enviou.'); return; }
+  if(u.indexOf('/exec')<0){ avisoLogin('Esse endereço não termina em <strong>/exec</strong>. Confira com a MJL — o endereço de <em>biblioteca</em> não funciona.'); return; }
+  localStorage.setItem(URL_CHAVE,u); fecharConfig();
+  avisoLogin('Endereço salvo. Pode entrar.','ok');
+}
+
+// ---------- senha ----------
+// A senha NUNCA sai do aparelho. Vai só o SHA-256 de email:senha, e o
+// servidor compara hash com hash. Nem a MJL consegue ver a senha de
+// ninguém — se a pessoa esquecer, a MJL zera e ela escolhe outra.
+async function hashSenha(email,senha){
+  var txt=String(email).trim().toLowerCase()+':'+String(senha);
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+async function entrar(){
+  var email=$('in-email').value.trim(), senha=$('in-senha').value.trim();
+  if(!email){ avisoLogin('Digite o seu e-mail.'); return; }
+  if(!/^\d{4}$/.test(senha)){ avisoLogin('A senha é de <strong>4 números</strong>.'); return; }
+  if(!urlScript()){ avisoLogin('O endereço do sistema ainda não foi configurado neste aparelho. Toque em <strong>configurar endereço do sistema</strong>.'); return; }
+  if(!window.crypto||!crypto.subtle){ avisoLogin('Este navegador é antigo demais para guardar sua senha com segurança. Abra o portal pelo Chrome ou pelo Safari.'); return; }
+
+  avisoLogin('Entrando…','info');
+  try{
+    var h=await hashSenha(email,senha);
+    var r=await fetch(urlScript()+'?acao=login&email='+encodeURIComponent(email)+'&h='+h,
+      {redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.erro){ avisoLogin(esc(d.erro)); return; }
+    sessao={token:d.token,nome:d.pessoa.nome,papel:d.pessoa.papel,clientes:d.pessoa.clientes,cliente:d.pessoa.clientes[0]||''};
+    localStorage.setItem(SESSAO_CHAVE,JSON.stringify(sessao));
+    if(d.primeiroAcesso) alert('Senha criada! Guarde os seus 4 números — é com eles que você entra daqui para frente.');
+    abrirApp();
+  }catch(e){
+    avisoLogin('Não consegui falar com o sistema. Confira sua internet e tente de novo.');
+  }
+}
+
+function sair(){
+  if(!confirm('Sair do portal?')) return;
+  localStorage.removeItem(SESSAO_CHAVE); sessao=null; dados=null;
+  if(timer){ clearInterval(timer); timer=null; }
+  $('app').classList.add('hidden'); $('login').style.display='flex';
+  $('in-senha').value=''; avisoLogin('');
+}
+
+function abrirApp(){
+  $('login').style.display='none';
+  $('app').classList.remove('hidden');
+  $('t-nome').textContent=sessao.nome||'Portal';
+  var sel=$('t-cliente');
+  if((sessao.clientes||[]).length>1){
+    sel.innerHTML=sessao.clientes.map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('');
+    sel.value=sessao.cliente; sel.classList.remove('hidden');
+  } else {
+    sel.classList.add('hidden');
+    $('t-nome').textContent=(sessao.nome||'')+' · '+(sessao.cliente||'');
+  }
+  buscar();
+  // Tempo real sem exagero: uma busca por minuto. O registro sai do
+  // celular do colaborador em segundos, então o cliente vê em até 1 min.
+  if(timer) clearInterval(timer);
+  timer=setInterval(buscar,60000);
+}
+
+function trocarCliente(){
+  sessao.cliente=$('t-cliente').value;
+  localStorage.setItem(SESSAO_CHAVE,JSON.stringify(sessao));
+  $('corpo').innerHTML='<div class="card vazio">Carregando…</div>';
+  buscar();
+}
+
+async function buscar(){
+  if(!sessao) return;
+  try{
+    var r=await fetch(urlScript()+'?acao=dados&token='+encodeURIComponent(sessao.token)+
+      '&cliente='+encodeURIComponent(sessao.cliente),{redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.erro==='sessao'){
+      localStorage.removeItem(SESSAO_CHAVE); sessao=null;
+      if(timer){ clearInterval(timer); timer=null; }
+      $('app').classList.add('hidden'); $('login').style.display='flex';
+      avisoLogin('Sua sessão expirou por segurança. Entre de novo.','info');
+      return;
+    }
+    if(d.erro){ $('corpo').innerHTML='<div class="card"><p class="vazio">'+esc(d.erro)+'</p></div>'; return; }
+    dados=d;
+    var ag=new Date();
+    $('t-atual').textContent='atualizado às '+ag.toTimeString().slice(0,5);
+    render();
+  }catch(e){
+    $('t-atual').textContent='sem conexão — mostrando o que já foi carregado';
+  }
+}
+
+// ---------- "Andar 1-9" vira 9 áreas (igual ao App Campo) ----------
+function expandirAreas(t){
+  t=String(t||'').trim(); if(!t) return [];
+  var out=[];
+  t.split(',').forEach(function(parte){
+    parte=parte.trim(); if(!parte) return;
+    var m=parte.match(/^(.*?)(\d+)\s*(?:-|a|até|–)\s*(\d+)\s*$/i);
+    if(m){
+      var pre=m[1].trim(), de=parseInt(m[2],10), ate=parseInt(m[3],10);
+      if(ate>=de && (ate-de)<200){ for(var i=de;i<=ate;i++) out.push((pre?pre+' ':'')+i); return; }
+    }
+    out.push(parte);
+  });
+  return out;
+}
+
+function irAba(a){
+  abaAtual=a;
+  document.querySelectorAll('.aba').forEach(function(b){ b.classList.toggle('on',b.dataset.aba===a); });
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  if(!dados) return;
+  var h='';
+  if(abaAtual==='hoje') h=telaHoje();
+  else if(abaAtual==='historico') h=telaHistorico();
+  else if(abaAtual==='visitas') h=telaVisitas();
+  else if(abaAtual==='avulsos') h=telaAvulsos();
+  else if(abaAtual==='chamados') h=telaChamados();
+  $('corpo').innerHTML=h;
+}
+
+// ================= HOJE =================
+// O coração do portal. Mostra o CONTRATADO para hoje ao lado do que já
+// foi registrado — e o que falta aparece como "ainda não registrado",
+// NUNCA como "não feito". Pode ser só falta de sinal no celular do
+// colaborador, e acusar alguém por causa de sinal é injusto.
+function telaHoje(){
+  var hoje=dados.hoje;
+  var feitosHoje=(dados.feitos||[]).filter(function(f){ return f.data===hoje; });
+  var prev=previstasDeHoje();
+  var casadas={}, pendentes=[];
+  prev.forEach(function(p){
+    var achou=feitosHoje.find(function(f){
+      return norm(f.tarefa)===norm(p.tarefa) && norm(f.area||'')===norm(p.area||'') && !casadas[f.itemId+f.hora];
+    });
+    if(achou){ casadas[achou.itemId+achou.hora]=1; }
+    else pendentes.push(p);
+  });
+  var extras=feitosHoje.filter(function(f){ return !casadas[f.itemId+f.hora]; });
+
+  var h='<div class="kpis">'+
+    '<div class="kpi"><div class="n">'+feitosHoje.length+'</div><div class="l">registrados hoje</div></div>'+
+    '<div class="kpi"><div class="n">'+pendentes.length+'</div><div class="l">ainda não</div></div>'+
+    '<div class="kpi"><div class="n">'+(dados.visitas||[]).filter(function(v){return v.data===hoje;}).length+'</div><div class="l">visitas hoje</div></div>'+
+    '</div>';
+
+  h+='<div class="sec"><h2>Feito hoje — '+dataBR(hoje)+'</h2><div class="card">';
+  if(!feitosHoje.length){
+    h+='<p class="vazio">Nada registrado ainda hoje.</p>';
+  } else {
+    feitosHoje.forEach(function(f){ h+=linhaTarefa(f,true); });
+  }
+  h+='</div></div>';
+
+  if(pendentes.length){
+    h+='<div class="sec"><h2>Previsto para hoje, ainda sem registro</h2><div class="card">';
+    pendentes.forEach(function(p){
+      h+='<div class="linha"><span class="selo s-esp">AINDA NÃO REGISTRADO</span> '+
+         '<div class="tarefa" style="margin-top:5px;">'+esc(p.tarefa)+'</div>'+
+         (p.area?('<div class="meta">📍 '+esc(p.area)+'</div>'):'')+'</div>';
+    });
+    h+='<p style="font-size:11.5px;color:var(--text3);margin:10px 0 0;">Sem registro não quer dizer sem fazer: o celular pode estar sem sinal e o registro entra assim que a internet voltar.</p>';
+    h+='</div></div>';
+  }
+  // "extras" (registrado hoje mas fora do cronograma do dia) NÃO ganha
+  // seção própria: o bloco "Feito hoje" acima já lista tudo que foi
+  // registrado, e repetir faz o síndico contar o mesmo serviço duas vezes.
+  return h;
+}
+function norm(s){ return String(s||'').trim().toLowerCase(); }
+
+function previstasDeHoje(){
+  var d=new Date(dados.hoje+'T12:00:00').getDay();
+  var out=[];
+  (dados.cronogramas||[]).forEach(function(c){
+    var dias=c.dias||[];
+    if(dias.indexOf(d)<0) return;
+    var lista=(c.tarefasPorDia||{})[d]||(c.tarefasPorDia||{})[String(d)]||[];
+    lista.forEach(function(t){
+      var texto=t.texto||t.tarefa||t;
+      var areas=expandirAreas(t.areas||'');
+      if(areas.length) areas.forEach(function(a){ out.push({tarefa:texto,area:a}); });
+      else out.push({tarefa:texto,area:t.area||''});
+    });
+  });
+  return out;
+}
+
+function linhaTarefa(f,comHora){
+  var h='<div class="linha">';
+  h+='<div class="tarefa"><span class="selo s-ok">REGISTRADO</span> '+esc(f.tarefa)+'</div>';
+  h+='<div class="meta">'+(f.area?('📍 '+esc(f.area)+' · '):'')+dataBR(f.data)+(comHora&&f.hora?(' às '+f.hora):'')+'</div>';
+  if(f.obs) h+='<div class="obs">'+esc(f.obs)+'</div>';
+  if((f.fotos||[]).length) h+=galeria(f.fotos);
+  h+='</div>';
+  return h;
+}
+function galeria(l){
+  return '<div class="fotos">'+l.map(function(f){
+    return '<img src="'+thumb(f.id,300)+'" loading="lazy" onclick="verFoto(\''+f.id+'\')" alt="foto">';
+  }).join('')+'</div>';
+}
+
+// ================= HISTÓRICO =================
+function telaHistorico(){
+  var l=dados.feitos||[];
+  if(!l.length) return '<div class="card"><p class="vazio">Nenhum serviço registrado nos últimos '+dados.diasHistorico+' dias.</p></div>';
+  var porDia={};
+  l.forEach(function(f){ (porDia[f.data]=porDia[f.data]||[]).push(f); });
+  var h='';
+  Object.keys(porDia).sort().reverse().forEach(function(dia){
+    h+='<div class="sec"><h2>'+dataBR(dia)+' · '+porDia[dia].length+' registro(s)</h2><div class="card">';
+    porDia[dia].forEach(function(f){ h+=linhaTarefa(f,true); });
+    h+='</div></div>';
+  });
+  return h;
+}
+
+// ================= VISITAS =================
+function telaVisitas(){
+  var l=dados.visitas||[];
+  if(!l.length) return '<div class="card"><p class="vazio">Nenhuma visita de supervisão nos últimos '+dados.diasHistorico+' dias.</p></div>';
+  var h='';
+  l.forEach(function(v){
+    h+='<div class="sec"><h2>Visita de '+dataBR(v.data)+'</h2><div class="card">';
+    h+='<div class="meta" style="margin-bottom:10px;">A equipe de supervisão da MJL esteve no local das '+(v.inicioHora||'—')+' às '+(v.fimHora||'—')+'.</div>';
+    var ruins=(v.itens||[]).filter(function(i){ return i.aval==='refazer'||i.aval==='naofeito'; });
+    var ok=(v.itens||[]).filter(function(i){ return i.aval==='ok'; });
+    if(ok.length) h+='<div class="linha"><span class="selo s-ok">'+ok.length+' CONFERIDO(S)</span> <span class="meta">serviços conferidos em campo e aprovados</span></div>';
+    ruins.forEach(function(i){
+      h+='<div class="linha">'+
+        '<span class="selo '+(i.aval==='refazer'?'s-ref':'s-nao')+'">'+(i.aval==='refazer'?'REFEITO A PEDIDO':'NÃO REALIZADO')+'</span>'+
+        '<div class="tarefa" style="margin-top:5px;">'+esc(i.tarefa)+'</div>'+
+        (i.area?('<div class="meta">📍 '+esc(i.area)+'</div>'):'')+
+        (i.just?('<div class="obs">'+esc(i.just)+'</div>'):'')+
+        ((i.fotos||[]).length?galeria(i.fotos):'')+
+      '</div>';
+    });
+    (v.extras||[]).forEach(function(x){
+      h+='<div class="linha"><span class="selo s-info">OBSERVADO NA VISITA</span>'+
+         '<div style="margin-top:5px;font-size:13.5px;">'+esc(x.texto)+'</div>'+
+         ((x.fotos||[]).length?galeria(x.fotos):'')+'</div>';
+    });
+    if(v.relatorio) h+='<div class="linha"><div class="card-title">Parecer da supervisão</div><div style="font-size:13.5px;">'+esc(v.relatorio)+'</div></div>';
+    if((v.fotosInicio||[]).length||(v.fotosFim||[]).length){
+      h+='<div class="linha"><div class="card-title">Registro da visita</div>'+galeria((v.fotosInicio||[]).concat(v.fotosFim||[]))+'</div>';
+    }
+    if(v.assinatura) h+='<div class="meta" style="margin-top:9px;">✍️ Recebido por '+esc(v.assinatura.nome)+(v.assinatura.funcao?(' ('+esc(v.assinatura.funcao)+')'):'')+'</div>';
+    h+='</div></div>';
+  });
+  return h;
+}
+
+// ================= AVULSOS =================
+function telaAvulsos(){
+  var l=dados.avulsos||[];
+  if(!l.length) return '<div class="card"><p class="vazio">Nenhum serviço extra executado nos últimos '+dados.diasHistorico+' dias.</p></div>';
+  var h='';
+  l.forEach(function(a){
+    h+='<div class="sec"><h2>⭐ '+esc(a.servico)+'</h2><div class="card">';
+    h+='<div class="meta" style="margin-bottom:10px;">'+dataBR(a.data)+
+       ((a.inicioHora&&a.fimHora)?(' · das '+a.inicioHora+' às '+a.fimHora):'')+'</div>';
+    (a.itens||[]).forEach(function(i){
+      h+='<div class="linha" style="padding:7px 0;">'+
+         (i.feito?'<span style="color:var(--green);font-weight:800;">✔</span>':'<span style="color:var(--red);font-weight:800;">✕</span>')+
+         ' '+esc(i.texto)+(i.just?('<div class="obs">'+esc(i.just)+'</div>'):'')+'</div>';
+    });
+    h+=paresAntesDepois(a);
+    if(a.relatorio) h+='<div class="obs" style="margin-top:10px;">'+esc(a.relatorio)+'</div>';
+    h+='</div></div>';
+  });
+  return h;
+}
+
+// O par vem do PONTO, não da ordem das fotos — senão o antes de um
+// lugar aparece ao lado do depois de outro.
+function paresAntesDepois(a){
+  var fotos=a.fotos||[];
+  var antes=fotos.filter(function(f){ return f.etapa==='antes'; });
+  var depois=fotos.filter(function(f){ return f.etapa==='depois'; });
+  if(!antes.length&&!depois.length) return '';
+  var h='<div style="margin-top:12px;"><div class="card-title">Antes e depois</div>';
+  var chaves=[], nomes={};
+  (a.pontos||[]).forEach(function(p){ if(p.nome&&chaves.indexOf(p.nome)<0){ chaves.push(p.nome); nomes[p.nome]=p.nome; } });
+  antes.concat(depois).forEach(function(f){ var k=f.ponto||''; if(k&&chaves.indexOf(k)<0) chaves.push(k); });
+  if(!chaves.length) chaves=['']; // registro antigo, sem ponto
+  chaves.forEach(function(k){
+    var pa=antes.filter(function(f){ return (f.ponto||'')===k; });
+    var pd=depois.filter(function(f){ return (f.ponto||'')===k; });
+    if(!pa.length&&!pd.length) return;
+    if(k) h+='<div style="font-size:13px;font-weight:800;color:var(--brand);margin:11px 0 3px;">📍 '+esc(k)+'</div>';
+    var n=Math.max(pa.length,pd.length);
+    for(var i=0;i<n;i++){
+      h+='<div class="par">'+
+        '<div><span class="tag t-antes">ANTES</span>'+(pa[i]?('<img src="'+thumb(pa[i].id,500)+'" loading="lazy" onclick="verFoto(\''+pa[i].id+'\')">'):'<div style="height:120px;border:1px dashed var(--border);border-radius:8px;"></div>')+'</div>'+
+        '<div><span class="tag t-depois">DEPOIS</span>'+(pd[i]?('<img src="'+thumb(pd[i].id,500)+'" loading="lazy" onclick="verFoto(\''+pd[i].id+'\')">'):'<div style="height:120px;border:1px dashed var(--border);border-radius:8px;"></div>')+'</div>'+
+      '</div>';
+    }
+  });
+  h+='</div>';
+  return h;
+}
+
+// ================= CHAMADOS =================
+function telaChamados(){
+  var l=dados.chamados||[];
+  if(!l.length) return '<div class="card"><p class="vazio">Nenhum chamado registrado para este condomínio.</p></div>';
+  var h='<div class="sec"><h2>Chamados do prédio</h2><div class="card">';
+  l.forEach(function(c){
+    var fechado=c.status==='fechado';
+    h+='<div class="linha">'+
+      '<span class="selo '+(fechado?'s-ok':'s-ref')+'">'+(fechado?'RESOLVIDO':'EM ABERTO')+'</span>'+
+      '<div class="tarefa" style="margin-top:5px;">'+esc(c.titulo||'Chamado')+'</div>'+
+      '<div class="meta">aberto em '+dataBR(c.data)+(fechado&&c.dataFechamento?(' · resolvido em '+dataBR(c.dataFechamento)):'')+'</div>'+
+      (c.obs?('<div class="obs">'+esc(c.obs)+'</div>'):'')+
+    '</div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+
+// ---------- início ----------
+(function(){
+  try{
+    var s=JSON.parse(localStorage.getItem(SESSAO_CHAVE)||'null');
+    if(s&&s.token){ sessao=s; abrirApp(); return; }
+  }catch(e){}
+  if(!urlScript()) avisoLogin('Antes do primeiro acesso, toque em <strong>configurar endereço do sistema</strong> e cole o endereço que a MJL enviou.','info');
+  $('in-senha').addEventListener('keydown',function(e){ if(e.key==='Enter') entrar(); });
+})();
+</script>
+</body>
+</html>
