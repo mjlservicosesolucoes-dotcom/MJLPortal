@@ -145,13 +145,66 @@ label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bot
     <button class="aba" data-aba="historico" onclick="irAba('historico')">Últimos 30 dias</button>
     <button class="aba" data-aba="visitas" onclick="irAba('visitas')">Supervisão</button>
     <button class="aba" data-aba="avulsos" onclick="irAba('avulsos')">Serviços extras</button>
+    <button class="aba" data-aba="pedidos" onclick="irAba('pedidos')">Meus pedidos<span id="aba-ped-badge" style="display:none;background:#c0392b;color:#fff;border-radius:9px;font-size:10px;padding:1px 6px;margin-left:5px;"></span></button>
     <button class="aba" data-aba="chamados" onclick="irAba('chamados')">Chamados</button>
   </div>
 
   <div id="corpo"></div>
   <div id="rodape">
     MJL Serviços e Soluções · CNPJ 46.636.732/0001-73 · (21) 96838-1313<br>
-    <span style="font-size:10px;">Portal v1.1</span>
+    <span style="font-size:10px;">Portal v2</span>
+  </div>
+</div>
+
+<div id="modal-pedido" class="hidden" style="position:fixed;inset:0;z-index:9500;background:rgba(14,30,45,.55);display:flex;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;width:100%;max-width:460px;border-radius:16px 16px 0 0;max-height:92vh;overflow:auto;padding:20px 18px 26px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <div style="flex:1;font-size:17px;font-weight:800;">Falar com a MJL</div>
+      <button onclick="fecharPedido()" style="background:none;border:none;font-size:24px;color:var(--text3);cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--text2);margin:0 0 14px;">
+      Escreva o que você viu. Isso chega na <strong>MJL</strong>, que avalia e encaminha para a equipe.
+      A sua mensagem não vai direto para o colaborador.
+    </p>
+    <div id="ped-aviso"></div>
+    <div style="margin-bottom:12px;">
+      <label>O que você quer registrar? *</label>
+      <textarea id="ped-texto" rows="4" placeholder="Ex.: o hall está com marca de óleo perto do elevador" style="width:100%;font-family:inherit;font-size:14.5px;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;resize:vertical;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label>Em que lugar? (opcional)</label>
+      <input type="text" id="ped-area" placeholder="Ex.: Hall, Garagem, 5º andar">
+    </div>
+    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;background:#fff8e1;border:1.5px solid #f3e2b0;border-radius:10px;padding:11px 12px;margin-bottom:12px;">
+      <input type="checkbox" id="ped-urgente" style="width:20px;height:20px;margin-top:1px;flex-shrink:0;">
+      <span style="font-size:13px;line-height:1.45;"><strong>A equipe ainda está no local agora.</strong><br>
+      <span style="color:var(--text2);">Marque só se der para resolver hoje mesmo — a MJL trata esses primeiro.</span></span>
+    </label>
+    <div id="ped-fotos-lista" style="margin-bottom:10px;"></div>
+    <label style="display:block;cursor:pointer;margin-bottom:14px;">
+      <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="pedidoFoto(event)">
+      <div class="btn btn-ghost" style="pointer-events:none;width:100%;padding:12px;">📷 Anexar foto (opcional)</div>
+    </label>
+    <button class="btn btn-primary" id="ped-enviar" style="width:100%;padding:14px;" onclick="enviarPedido()">Enviar para a MJL</button>
+  </div>
+</div>
+
+<div id="modal-assinar" class="hidden" style="position:fixed;inset:0;z-index:9500;background:rgba(14,30,45,.55);display:flex;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;width:100%;max-width:460px;border-radius:16px 16px 0 0;padding:20px 18px 26px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <div style="flex:1;font-size:17px;font-weight:800;">Assinar o recebimento</div>
+      <button onclick="fecharAssinar()" style="background:none;border:none;font-size:24px;color:var(--text3);cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <p id="ass-sub" style="font-size:12.5px;color:var(--text2);margin:0 0 14px;"></p>
+    <div id="ass-aviso"></div>
+    <input type="hidden" id="ass-visita">
+    <div style="margin-bottom:12px;"><label>Seu nome completo *</label><input type="text" id="ass-nome"></div>
+    <div style="margin-bottom:14px;"><label>Função</label><input type="text" id="ass-funcao" placeholder="Ex.: Síndico, Administradora, Zelador"></div>
+    <p style="font-size:11.5px;color:var(--text3);margin:0 0 14px;line-height:1.5;">
+      Ao confirmar, fica registrado o seu nome, a data e a hora. Assinatura eletrônica — Art. 10 da MP 2.200-2/2001.
+      Depois de registrada, não é possível trocar.
+    </p>
+    <button class="btn btn-green" id="ass-enviar" style="width:100%;padding:14px;" onclick="enviarAssinatura()">Confirmo o recebimento</button>
   </div>
 </div>
 
@@ -317,6 +370,215 @@ function expandirAreas(t){
   return out;
 }
 
+
+// ================================================================
+// v2 — O CLIENTE PASSA A PODER ESCREVER
+//
+// Duas coisas, e só duas:
+//   1. "Falar com a MJL" — registra o que ele viu, com foto
+//   2. Assinar o recebimento de uma visita de supervisão
+//
+// A REGRA QUE MANDA: o pedido do cliente NÃO vira ordem para o
+// colaborador. Ele chega na caixa da MJL TRAVADO e só segue para o
+// celular da equipe depois que a MJL liberar. Isso está escrito na
+// tela, em português, porque o cliente precisa entender — senão ele
+// acha que mandou na equipe e cobra como se tivesse mandado.
+//
+// O envio é POST com mode 'no-cors': o navegador não lê a resposta.
+// Por isso a tela mostra o pedido na hora (otimista) e a busca
+// seguinte, em até 1 minuto, confirma com o status de verdade.
+// ================================================================
+var _pedFotos=[];   // fotos já enviadas deste pedido (só a contagem importa)
+var _pedId=null;
+
+function abrirPedido(){
+  _pedId='pc'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  _pedFotos=[];
+  document.getElementById('ped-texto').value='';
+  document.getElementById('ped-area').value='';
+  document.getElementById('ped-urgente').checked=false;
+  document.getElementById('ped-aviso').innerHTML='';
+  document.getElementById('ped-fotos-lista').innerHTML='';
+  document.getElementById('ped-enviar').disabled=false;
+  document.getElementById('ped-enviar').textContent='Enviar para a MJL';
+  document.getElementById('modal-pedido').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function fecharPedido(){
+  document.getElementById('modal-pedido').classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+// A foto vai para o servidor NA HORA, igual ao App Campo: imagem
+// grande parada na memória do navegador é o que derruba o aparelho.
+function pedidoFoto(ev){
+  var f=ev.target.files&&ev.target.files[0];
+  ev.target.value='';
+  if(!f) return;
+  var lista=document.getElementById('ped-fotos-lista');
+  var idx=_pedFotos.length;
+  _pedFotos.push('enviando');
+  lista.innerHTML='<div style="font-size:12.5px;color:var(--text2);">⏳ enviando foto…</div>';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    comprimirFotoPortal(e.target.result,function(comp){
+      postScript({acao:'salvarFoto',token:sessao.token,dados:{
+        refId:_pedId, cliente:sessao.cliente, img:comp
+      }});
+      _pedFotos[idx]='ok';
+      lista.innerHTML='<div style="font-size:12.5px;color:var(--green);font-weight:700;">📷 '+
+        _pedFotos.length+' foto(s) anexada(s)</div>';
+    });
+  };
+  reader.readAsDataURL(f);
+}
+
+function comprimirFotoPortal(dataUrl,cb){
+  var img=new Image();
+  img.onload=function(){
+    var c=document.createElement('canvas');
+    var w=img.width,h=img.height,max=900;
+    if(w>max||h>max){ if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;} }
+    c.width=w;c.height=h;
+    var ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0,w,h);
+    // carimbo: local e data/hora queimados na imagem, como nas fotos da equipe
+    try{
+      var ag=new Date();
+      var txt=(sessao.cliente||'')+' · '+ag.toLocaleDateString('pt-BR')+' '+ag.toTimeString().slice(0,5);
+      var fs=Math.max(11,Math.round(w*0.028));
+      ctx.font='bold '+fs+'px sans-serif';
+      var larg=ctx.measureText(txt).width+14;
+      ctx.fillStyle='rgba(0,0,0,.55)';
+      ctx.fillRect(6,h-fs-14,larg,fs+9);
+      ctx.fillStyle='#fff';
+      ctx.fillText(txt,13,h-10);
+    }catch(e){}
+    cb(c.toDataURL('image/jpeg',0.72));
+  };
+  img.onerror=function(){ cb(dataUrl); };
+  img.src=dataUrl;
+}
+
+function enviarPedido(){
+  var texto=document.getElementById('ped-texto').value.trim();
+  if(!texto){
+    document.getElementById('ped-aviso').innerHTML='<div class="aviso aviso-err">Escreva o que você quer registrar.</div>';
+    return;
+  }
+  var btn=document.getElementById('ped-enviar');
+  btn.disabled=true; btn.textContent='Enviando…';
+  var enviadas=_pedFotos.filter(function(x){ return x==='ok'; }).length;
+  var pedido={
+    id:_pedId, local:sessao.cliente,
+    area:document.getElementById('ped-area').value.trim(),
+    texto:texto,
+    urgente:document.getElementById('ped-urgente').checked,
+    fotos:enviadas
+  };
+  postScript({acao:'pedirAtencao',token:sessao.token,dados:pedido});
+
+  // mostra na hora, sem esperar a planilha responder
+  var ag=new Date();
+  if(dados&&dados.pedidos) dados.pedidos.unshift({
+    id:_pedId, texto:texto, area:pedido.area,
+    data:ag.toISOString().slice(0,10), hora:ag.toTimeString().slice(0,5),
+    urgente:pedido.urgente, situacao:'recebido', fotos:[], _novo:true
+  });
+  fecharPedido();
+  irAba('pedidos');
+  alert('Pedido enviado para a MJL. Você acompanha a situação dele aqui mesmo, na aba Meus pedidos.');
+}
+
+// ---------- assinatura ----------
+function abrirAssinar(visitaId, data){
+  document.getElementById('ass-visita').value=visitaId;
+  document.getElementById('ass-sub').textContent='Visita de supervisão da MJL em '+dataBR(data)+'.';
+  document.getElementById('ass-nome').value=sessao.nome||'';
+  document.getElementById('ass-funcao').value='';
+  document.getElementById('ass-aviso').innerHTML='';
+  document.getElementById('ass-enviar').disabled=false;
+  document.getElementById('ass-enviar').textContent='Confirmo o recebimento';
+  document.getElementById('modal-assinar').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function fecharAssinar(){
+  document.getElementById('modal-assinar').classList.add('hidden');
+  document.body.style.overflow='';
+}
+function enviarAssinatura(){
+  var nome=document.getElementById('ass-nome').value.trim();
+  if(!nome){
+    document.getElementById('ass-aviso').innerHTML='<div class="aviso aviso-err">Informe o seu nome completo.</div>';
+    return;
+  }
+  var id=document.getElementById('ass-visita').value;
+  var btn=document.getElementById('ass-enviar');
+  btn.disabled=true; btn.textContent='Registrando…';
+  postScript({acao:'assinarVisita',token:sessao.token,dados:{
+    visitaId:id, nome:nome, funcao:document.getElementById('ass-funcao').value.trim()
+  }});
+  var v=(dados.visitas||[]).find(function(x){ return x.id===id; });
+  if(v) v.assinatura={nome:nome,funcao:document.getElementById('ass-funcao').value.trim()};
+  fecharAssinar();
+  render();
+  alert('Recebimento registrado. Obrigado!');
+}
+
+// ---------- envio ----------
+// mode 'no-cors': o navegador não lê a resposta. Quem confirma de
+// verdade é a busca seguinte, em até 1 minuto.
+function postScript(corpo){
+  try{
+    fetch(urlScript(),{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)}).catch(function(){});
+  }catch(e){}
+}
+
+// ================= ABA MEUS PEDIDOS =================
+function telaPedidos(){
+  var l=dados.pedidos||[];
+  var h='<div class="card" style="margin-bottom:14px;">'+
+    '<div class="card-title">Falar com a MJL</div>'+
+    '<p style="font-size:13px;color:var(--text2);margin-bottom:12px;">'+
+    'Viu algo que precisa de atenção? Registre aqui, com foto se quiser. '+
+    '<strong>A mensagem chega na MJL</strong>, que avalia e encaminha para a equipe — '+
+    'ela não vai direto para o colaborador.</p>'+
+    '<button class="btn btn-primary" style="width:100%;padding:13px;" onclick="abrirPedido()">✍️ Novo pedido</button></div>';
+
+  if(!l.length){
+    h+='<div class="card"><p class="vazio">Você ainda não registrou nenhum pedido.</p></div>';
+    return h;
+  }
+  h+='<div class="sec"><h2>Seus pedidos</h2>';
+  l.forEach(function(p){
+    var sel={
+      recebido:['RECEBIDO PELA MJL','#1a4f7a'],
+      encaminhado:['ENCAMINHADO À EQUIPE','#e67e22'],
+      resolvido:['RESOLVIDO','#1e7e4a'],
+      cancelado:['NÃO SERÁ FEITO','#8a9aaa']
+    }[p.situacao]||['RECEBIDO PELA MJL','#1a4f7a'];
+    h+='<div class="card" style="margin-bottom:10px;">'+
+      '<span class="selo" style="background:'+sel[1]+';">'+sel[0]+'</span>'+
+      (p.urgente?' <span class="selo" style="background:#c0392b;">EQUIPE NO LOCAL</span>':'')+
+      '<div style="font-size:14.5px;margin-top:7px;">'+esc(p.texto)+'</div>'+
+      '<div class="meta">'+(p.area?('📍 '+esc(p.area)+' · '):'')+dataBR(p.data)+(p.hora?(' às '+p.hora):'')+'</div>'+
+      ((p.fotos||[]).length?galeria(p.fotos):'')+
+      (p.respostaMJL?('<div class="obs"><strong>MJL:</strong> '+esc(p.respostaMJL)+'</div>'):'')+
+      (p.situacao==='resolvido'&&p.resolvidoEm?('<div class="meta" style="color:var(--green);font-weight:700;">✅ Resolvido em '+dataBR(p.resolvidoEm)+'</div>'):'')+
+      (p._novo?'<div class="meta">enviando…</div>':'')+
+    '</div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function badgePedidos(){
+  var b=document.getElementById('aba-ped-badge'); if(!b) return;
+  var n=(dados&&dados.pedidos||[]).filter(function(p){ return p.situacao==='recebido'||p.situacao==='encaminhado'; }).length;
+  b.textContent=n; b.style.display=n?'':'none';
+}
+
 function irAba(a){
   abaAtual=a;
   document.querySelectorAll('.aba').forEach(function(b){ b.classList.toggle('on',b.dataset.aba===a); });
@@ -331,8 +593,10 @@ function render(){
   else if(abaAtual==='historico') h=telaHistorico();
   else if(abaAtual==='visitas') h=telaVisitas();
   else if(abaAtual==='avulsos') h=telaAvulsos();
+  else if(abaAtual==='pedidos') h=telaPedidos();
   else if(abaAtual==='chamados') h=telaChamados();
   $('corpo').innerHTML=h;
+  badgePedidos();
 }
 
 // ================= HOJE =================
@@ -359,6 +623,12 @@ function telaHoje(){
     '<div class="kpi"><div class="n">'+pendentes.length+'</div><div class="l">ainda não</div></div>'+
     '<div class="kpi"><div class="n">'+(dados.visitas||[]).filter(function(v){return v.data===hoje;}).length+'</div><div class="l">visitas hoje</div></div>'+
     '</div>';
+
+  h+='<div onclick="abrirPedido()" style="cursor:pointer;background:#fff;border:1.5px solid var(--brand);color:var(--brand);border-radius:var(--r);padding:13px 15px;margin-bottom:16px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow);">'+
+     '<div style="font-size:22px;line-height:1;">✍️</div>'+
+     '<div style="flex:1;"><div style="font-size:14.5px;font-weight:800;">Viu algo que precisa de atenção?</div>'+
+     '<div style="font-size:12px;color:var(--text2);">Registre aqui — chega na MJL, que encaminha para a equipe</div></div>'+
+     '<div style="font-size:20px;">›</div></div>';
 
   h+='<div class="sec"><h2>Feito hoje — '+dataBR(hoje)+'</h2><div class="card">';
   if(!feitosHoje.length){
@@ -462,6 +732,7 @@ function telaVisitas(){
       h+='<div class="linha"><div class="card-title">Registro da visita</div>'+galeria((v.fotosInicio||[]).concat(v.fotosFim||[]))+'</div>';
     }
     if(v.assinatura) h+='<div class="meta" style="margin-top:9px;">✍️ Recebido por '+esc(v.assinatura.nome)+(v.assinatura.funcao?(' ('+esc(v.assinatura.funcao)+')'):'')+'</div>';
+    else h+='<button class="btn btn-green" style="width:100%;padding:12px;margin-top:11px;" onclick="abrirAssinar(\''+v.id+'\',\''+v.data+'\')">✍️ Assinar o recebimento desta visita</button>';
     h+='</div></div>';
   });
   return h;
